@@ -5,7 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Routing;
 
 namespace WebApplication1
 {
@@ -15,20 +18,67 @@ namespace WebApplication1
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-        }
+            //you have to register IGreeter
+            services.AddSingleton<IGreeter, Greeting>();
+            services.AddMvc();
+        }  
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IConfiguration configuration,IGreeter greeter,ILogger<Startup> logger)
         {
             if (env.IsDevelopment())
             {
+         
+            //this is to know the developer exception track record
                 app.UseDeveloperExceptionPage();
             }
+            // To Use static files for displaying in the view
+            app.UseStaticFiles();
+
+            //
+           // app.UseMvcWithDefaultRoute();
+            
+            //app.Use(next =>
+            //{
+            //    return async context =>
+            //    {
+            //        logger.LogInformation("Request incoming");
+            //        if (context.Request.Path.StartsWithSegments("/mym"))
+            //        {
+            //            await context.Response.WriteAsync("Hit!!");
+            //            logger.LogInformation("Request Handled");
+
+            //        }
+            //        else
+            //        {
+            //            await next(context);
+            //            logger.LogInformation("Response outgoing");
+            //        }
+            //    };
+            //});
+
+            app.UseMvc(ConfigureRoutes);
+
+            //app.UseWelcomePage(
+            //new WelcomePageOptions(){
+            //    Path = "/wp"
+            //});
+
 
             app.Run(async (context) =>
             {
-                await context.Response.WriteAsync("Hello World!");
+                // throw new Exception("excpeton");
+                //var greeting = configuration["Greeting"];
+                var greeting = greeter.GetMessageOfTheDay();
+                await context.Response.WriteAsync(greeting);
             });
+
+        }
+
+        private void ConfigureRoutes(IRouteBuilder routeBuilder)
+        {
+            //Home/Index/1
+            routeBuilder.MapRoute("Default", "{controller}/{action}/{id?}");
         }
     }
 }
