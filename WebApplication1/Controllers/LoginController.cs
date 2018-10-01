@@ -6,16 +6,20 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebApplication1.Controllers
 {
-    [Route("Login")]
+    //[Route("Login")]
     public class LoginController : Controller
     {
         //[Route("")] This is Empty action for the controller
         public IActionResult Index()
         {
+            int i = 0;
+            //get the controller,actionname
+
+            string controller=this.ControllerContext.ActionDescriptor.ActionName;
             return View();
         }
 
-        [Route("Address")]
+        
         public IActionResult Address()
         {
             return View();
